@@ -1,20 +1,36 @@
 import os
 import time
-import google.generativeai as genai
 from typing import Dict, Any, Optional, Generator
+from dotenv import load_dotenv
+
+# Automatically load environment variables from .env
+load_dotenv()
+
 from src.core.llm_provider import LLMProvider
 
+try:
+    import google.generativeai as genai
+    HAS_GEMINI = True
+except ImportError:
+    genai = None
+    HAS_GEMINI = False
+
 class GeminiProvider(LLMProvider):
-    def __init__(self, model_name: str = "gemini-1.5-flash", api_key: Optional[str] = None):
-        super().__init__(model_name, api_key)
-        genai.configure(api_key=self.api_key)
+    def __init__(self, model_name: str = "gemini-2.5-flash", api_key: Optional[str] = None):
+        if not HAS_GEMINI:
+            raise RuntimeError(
+                "Package 'google-generativeai' is not installed in your Python environment.\n"
+                "Please run: pip install google-generativeai"
+            )
+        key = api_key or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+        super().__init__(model_name, key)
+        if key:
+            genai.configure(api_key=key)
         self.model = genai.GenerativeModel(model_name)
 
     def generate(self, prompt: str, system_prompt: Optional[str] = None) -> Dict[str, Any]:
         start_time = time.time()
         
-        # In Gemini, system instruction is passed during model initialization or as a prefix
-        # For simplicity in this lab, we'll prepend it if provided
         full_prompt = prompt
         if system_prompt:
             full_prompt = f"System: {system_prompt}\n\nUser: {prompt}"
@@ -24,13 +40,14 @@ class GeminiProvider(LLMProvider):
         end_time = time.time()
         latency_ms = int((end_time - start_time) * 1000)
 
-        # Gemini usage data is in response.usage_metadata
         content = response.text
-        usage = {
-            "prompt_tokens": response.usage_metadata.prompt_token_count,
-            "completion_tokens": response.usage_metadata.candidates_token_count,
-            "total_tokens": response.usage_metadata.total_token_count
-        }
+        usage = {}
+        if hasattr(response, "usage_metadata") and response.usage_metadata:
+            usage = {
+                "prompt_tokens": getattr(response.usage_metadata, "prompt_token_count", 0),
+                "completion_tokens": getattr(response.usage_metadata, "candidates_token_count", 0),
+                "total_tokens": getattr(response.usage_metadata, "total_token_count", 0)
+            }
 
         return {
             "content": content,

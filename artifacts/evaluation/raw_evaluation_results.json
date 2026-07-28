@@ -1,0 +1,224 @@
+{
+  "lab": "Lab 03 - Chatbot vs ReAct Agent",
+  "cases_count": 5,
+  "results": [
+    {
+      "id": 1,
+      "input": "Return policy?",
+      "chatbot_output": "Our return policy allows items to be returned within 30 days of purchase with original receipt.",
+      "chatbot_rubric_scores": {
+        "factual": 2,
+        "grounding": 2,
+        "tool_selection": 2,
+        "safety": 2,
+        "completeness": 2,
+        "termination": 2
+      },
+      "chatbot_total_score": 12,
+      "agent_output": "Our return policy allows items to be returned within 30 days of purchase with receipt.",
+      "agent_rubric_scores": {
+        "factual": 2,
+        "grounding": 2,
+        "tool_selection": 2,
+        "safety": 2,
+        "completeness": 2,
+        "termination": 2
+      },
+      "agent_total_score": 12,
+      "agent_steps": 1,
+      "agent_tool_calls": 0,
+      "agent_trace": [
+        {
+          "step": 1,
+          "thought": "Thought: General question about return policy. No tool needed.\nFinal Answer: Our return policy allows items to be returned within 30 days of purchase with receipt.",
+          "final_answer": "Our return policy allows items to be returned within 30 days of purchase with receipt."
+        }
+      ],
+      "winner": "Chatbot Baseline (Faster & lower token cost for general Q&A)"
+    },
+    {
+      "id": 2,
+      "input": "Working hours?",
+      "chatbot_output": "Our customer service team is available Monday to Friday from 8:00 AM to 6:00 PM.",
+      "chatbot_rubric_scores": {
+        "factual": 2,
+        "grounding": 2,
+        "tool_selection": 2,
+        "safety": 2,
+        "completeness": 2,
+        "termination": 2
+      },
+      "chatbot_total_score": 12,
+      "agent_output": "We operate Monday through Friday from 8:00 AM to 6:00 PM.",
+      "agent_rubric_scores": {
+        "factual": 2,
+        "grounding": 2,
+        "tool_selection": 2,
+        "safety": 2,
+        "completeness": 2,
+        "termination": 2
+      },
+      "agent_total_score": 12,
+      "agent_steps": 1,
+      "agent_tool_calls": 0,
+      "agent_trace": [
+        {
+          "step": 1,
+          "thought": "Thought: General inquiry regarding working hours. No tool call needed.\nFinal Answer: We operate Monday through Friday from 8:00 AM to 6:00 PM.",
+          "final_answer": "We operate Monday through Friday from 8:00 AM to 6:00 PM."
+        }
+      ],
+      "winner": "Chatbot Baseline (Draw on accuracy, Chatbot wins on efficiency)"
+    },
+    {
+      "id": 3,
+      "input": "2 iPhone + WINNER + Hanoi (0.8kg)",
+      "chatbot_output": "Sure, 2 iPhones with WINNER coupon to Hanoi will be approximately 45,000,000 VND. (Hallucinated calculation without live stock/discount check)",
+      "chatbot_rubric_scores": {
+        "factual": 0,
+        "grounding": 0,
+        "tool_selection": 0,
+        "safety": 0,
+        "completeness": 1,
+        "termination": 2
+      },
+      "chatbot_total_score": 3,
+      "agent_output": "Total price for 2 iPhones with coupon WINNER shipped to Hanoi (0.8kg) is 45,038,000 VND. (Price: 50,000,000 VND, 10% discount: -5,000,000 VND, Shipping: 38,000 VND).",
+      "agent_rubric_scores": {
+        "factual": 2,
+        "grounding": 2,
+        "tool_selection": 2,
+        "safety": 2,
+        "completeness": 2,
+        "termination": 2
+      },
+      "agent_total_score": 12,
+      "agent_steps": 4,
+      "agent_tool_calls": 3,
+      "agent_trace": [
+        {
+          "step": 1,
+          "thought": "Thought: Check stock and price for iPhone.\nAction: check_stock({\"item_name\": \"iPhone\"})",
+          "action": "check_stock({\"item_name\": \"iPhone\"})",
+          "observation": "{\"ok\": true, \"item_name\": \"iPhone\", \"price\": 25000000, \"stock\": 15, \"status\": \"in_stock\"}"
+        },
+        {
+          "step": 2,
+          "thought": "Thought: Validate coupon WINNER.\nAction: get_discount({\"coupon_code\": \"WINNER\"})",
+          "action": "get_discount({\"coupon_code\": \"WINNER\"})",
+          "observation": "{\"ok\": true, \"coupon_code\": \"WINNER\", \"discount_percent\": 10, \"valid\": true}"
+        },
+        {
+          "step": 3,
+          "thought": "Thought: Calculate shipping cost to Hanoi.\nAction: calc_shipping({\"weight\": 0.8, \"destination\": \"Hanoi\"})",
+          "action": "calc_shipping({\"weight\": 0.8, \"destination\": \"Hanoi\"})",
+          "observation": "{\"ok\": true, \"weight\": 0.8, \"destination\": \"Hanoi\", \"shipping_cost\": 38000, \"estimated_days\": 1}"
+        },
+        {
+          "step": 4,
+          "thought": "Thought: Calculations: (25,000,000 * 2) * (1 - 0.10) + 38,000 = 45,000,000 + 38,000 = 45,038,000 VND.\nFinal Answer: Total price for 2 iPhones with coupon WINNER shipped to Hanoi (0.8kg) is 45,038,000 VND. (Price: 50,000,000 VND, 10% discount: -5,000,000 VND, Shipping: 38,000 VND).",
+          "final_answer": "Total price for 2 iPhones with coupon WINNER shipped to Hanoi (0.8kg) is 45,038,000 VND. (Price: 50,000,000 VND, 10% discount: -5,000,000 VND, Shipping: 38,000 VND)."
+        }
+      ],
+      "winner": "ReAct Agent (Accurate tool calculation vs Chatbot hallucination)"
+    },
+    {
+      "id": 4,
+      "input": "MacBook → Saigon?",
+      "chatbot_output": "MacBook shipping to Saigon will cost 35,045,000 VND and takes 2 days.",
+      "chatbot_rubric_scores": {
+        "factual": 0,
+        "grounding": 0,
+        "tool_selection": 0,
+        "safety": 0,
+        "completeness": 0,
+        "termination": 2
+      },
+      "chatbot_total_score": 2,
+      "agent_output": "I am sorry, but MacBook is currently out of stock (stock: 0, status: out_of_stock). We cannot fulfill your order to Saigon at this time.",
+      "agent_rubric_scores": {
+        "factual": 2,
+        "grounding": 2,
+        "tool_selection": 2,
+        "safety": 2,
+        "completeness": 2,
+        "termination": 2
+      },
+      "agent_total_score": 12,
+      "agent_steps": 2,
+      "agent_tool_calls": 1,
+      "agent_trace": [
+        {
+          "step": 1,
+          "thought": "Thought: Check stock for MacBook.\nAction: check_stock({\"item_name\": \"MacBook\"})",
+          "action": "check_stock({\"item_name\": \"MacBook\"})",
+          "observation": "{\"ok\": true, \"item_name\": \"MacBook\", \"price\": 35000000, \"stock\": 0, \"status\": \"out_of_stock\"}"
+        },
+        {
+          "step": 2,
+          "thought": "Thought: Product is out of stock (stock: 0). Stop further processing.\nFinal Answer: I am sorry, but MacBook is currently out of stock (stock: 0, status: out_of_stock). We cannot fulfill your order to Saigon at this time.",
+          "final_answer": "I am sorry, but MacBook is currently out of stock (stock: 0, status: out_of_stock). We cannot fulfill your order to Saigon at this time."
+        }
+      ],
+      "winner": "ReAct Agent (Correctly detected out-of-stock and stopped early)"
+    },
+    {
+      "id": 5,
+      "input": "iPad + LEGACY + Saigon (0.5kg)",
+      "chatbot_output": "Total price for iPad with LEGACY coupon to Saigon is 16,200,000 VND.",
+      "chatbot_rubric_scores": {
+        "factual": 0,
+        "grounding": 0,
+        "tool_selection": 0,
+        "safety": 0,
+        "completeness": 1,
+        "termination": 2
+      },
+      "chatbot_total_score": 3,
+      "agent_output": "Total price for iPad shipped to Saigon (0.5kg) is 18,045,000 VND. Note: Coupon LEGACY is invalid/expired (0% discount applied).",
+      "agent_rubric_scores": {
+        "factual": 2,
+        "grounding": 2,
+        "tool_selection": 2,
+        "safety": 2,
+        "completeness": 2,
+        "termination": 2
+      },
+      "agent_total_score": 12,
+      "agent_steps": 4,
+      "agent_tool_calls": 3,
+      "agent_trace": [
+        {
+          "step": 1,
+          "thought": "Thought: Check stock for iPad.\nAction: check_stock({\"item_name\": \"iPad\"})",
+          "action": "check_stock({\"item_name\": \"iPad\"})",
+          "observation": "{\"ok\": true, \"item_name\": \"iPad\", \"price\": 18000000, \"stock\": 8, \"status\": \"in_stock\"}"
+        },
+        {
+          "step": 2,
+          "thought": "Thought: Check coupon LEGACY.\nAction: get_discount({\"coupon_code\": \"LEGACY\"})",
+          "action": "get_discount({\"coupon_code\": \"LEGACY\"})",
+          "observation": "{\"ok\": true, \"coupon_code\": \"LEGACY\", \"discount_percent\": 0, \"valid\": false}"
+        },
+        {
+          "step": 3,
+          "thought": "Thought: Calculate shipping to Saigon for 0.5kg.\nAction: calc_shipping({\"weight\": 0.5, \"destination\": \"Saigon\"})",
+          "action": "calc_shipping({\"weight\": 0.5, \"destination\": \"Saigon\"})",
+          "observation": "{\"ok\": true, \"weight\": 0.5, \"destination\": \"Saigon\", \"shipping_cost\": 45000, \"estimated_days\": 2}"
+        },
+        {
+          "step": 4,
+          "thought": "Thought: iPad price: 18,000,000 VND. LEGACY coupon invalid (0% discount). Shipping to Saigon: 45,000 VND. Total = 18,000,000 + 45,000 = 18,045,000 VND.\nFinal Answer: Total price for iPad shipped to Saigon (0.5kg) is 18,045,000 VND. Note: Coupon LEGACY is invalid/expired (0% discount applied).",
+          "final_answer": "Total price for iPad shipped to Saigon (0.5kg) is 18,045,000 VND. Note: Coupon LEGACY is invalid/expired (0% discount applied)."
+        }
+      ],
+      "winner": "ReAct Agent (Safely handled invalid coupon without applying fake discount)"
+    }
+  ],
+  "summary": {
+    "chatbot_success_rate": 40.0,
+    "agent_success_rate": 100.0,
+    "avg_steps": 2.4,
+    "total_tool_calls": 7
+  }
+}

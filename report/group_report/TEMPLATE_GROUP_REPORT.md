@@ -28,7 +28,7 @@
 
 ### 2.3 LLM Providers Used
 - **Primary**: [e.g., GPT-4o]
-- **Secondary (Backup)**: [e.g., Gemini 1.5 Flash]
+- **Secondary (Backup)**: [e.g., Gemini 2.5 Flash]
 
 ---
 

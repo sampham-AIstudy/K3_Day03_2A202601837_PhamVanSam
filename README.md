@@ -54,3 +54,5 @@ The code is designed as a **Production Prototype**. It includes:
 ---
 
 *Happy Coding! Let's build agents that actually work.*
+ ## Chạy ux/ui local:
+ python src/web/server.py

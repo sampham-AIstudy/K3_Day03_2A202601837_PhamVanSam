@@ -1,0 +1,24 @@
+{
+  "user_input": "Check stock for iPhone",
+  "error_type": "UNKNOWN_TOOL",
+  "sanitized": true,
+  "steps": [
+    {
+      "step": 1,
+      "thought": "Thought: Search product in catalog.",
+      "action": "search_product({\"query\": \"iPhone\"})",
+      "observation": "{\"ok\": false, \"error\": \"Unknown tool 'search_product'. Available tools: ['check_stock', 'get_discount', 'calc_shipping']\"}"
+    },
+    {
+      "step": 2,
+      "thought": "Thought: Tool search_product not found. Using check_stock instead.",
+      "action": "check_stock({\"item_name\": \"iPhone\"})",
+      "observation": "{\"ok\": true, \"item_name\": \"iPhone\", \"price\": 25000000, \"stock\": 15, \"status\": \"in_stock\"}"
+    },
+    {
+      "step": 3,
+      "thought": "Thought: Stock information received.",
+      "final_answer": "iPhone currently has 15 items in stock at 25,000,000 VND."
+    }
+  ]
+}
