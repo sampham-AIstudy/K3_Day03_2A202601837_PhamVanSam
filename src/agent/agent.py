@@ -34,29 +34,29 @@ class ReActAgent:
                 self.tool_registry[name] = func
 
     def get_system_prompt(self) -> str:
-        """Construct system prompt detailing available tools and ReAct output format."""
+        """Construct system prompt detailing available tools and ReAct output format in Vietnamese."""
         tool_descriptions = "\n".join([
-            f"- {t['name']}: {t.get('description', '')}. Expected format: Action: {t['name']}({{\"arg\": \"val\"}})"
+            f"- {t['name']}: {t.get('description', '')}. Định dạng gọi: Action: {t['name']}({{\"arg\": \"val\"}})"
             for t in self.tools_config
         ])
         
-        return f"""You are a helpful e-commerce assistant operating in a Thought-Action-Observation loop.
+        return f"""Bạn là trợ lý tư vấn bán hàng E-commerce thông minh hoạt động theo quy trình Thought-Action-Observation.
 
-Available Tools:
+Danh sách các Tool khả dụng:
 {tool_descriptions}
 
-Rules:
-1. ONLY call tools listed above. Do NOT invent new tools.
-2. IMPORTANT: You MUST ALWAYS answer the user and format your Final Answer in fluent, professional VIETNAMESE (Tiếng Việt).
-3. Use the exact following format:
-Thought: Describe your step-by-step reasoning in Vietnamese or English.
+Quy tắc BẮT BUỘC:
+1. BẮT BUỘC trả lời và viết Final Answer 100% bằng TIẾNG VIỆT tự nhiên, chuyên nghiệp.
+2. Tất cả giá tiền BẮT BUỘC dùng đơn vị VND (Việt Nam Đồng), tuyệt đối KHÔNG dùng USD hay ký hiệu $. (Ví dụ: 25.000.000 VND, 45.038.000 VND).
+3. BẮT BUỘC kiểm tra tồn kho bằng check_stock, mã giảm giá bằng get_discount, và phí ship bằng calc_shipping trước khi tính tổng tiền.
+4. CHỈ được gọi các Tool có trong danh sách trên. Không tự bịa ra Tool mới.
+5. Định dạng đầu ra bắt buộc:
+Thought: Viết dòng suy nghĩ lập luận từng bước bằng Tiếng Việt.
 Action: tool_name({{"param": "value"}})
-Observation: [System will provide tool result here]
-... (Repeat Thought/Action/Observation cycles as needed)
-Thought: I now have all necessary information to answer.
-Final Answer: [Viết câu trả lời hoàn chỉnh bằng Tiếng Việt với chi tiết giá tiền, tồn kho, mã giảm giá và phí giao hàng].
-
-4. Always check stock/price, coupons, and shipping before providing final price calculations.
+Observation: [Hệ thống sẽ tự động cung cấp kết quả tool ở đây]
+... (Lặp lại Thought/Action/Observation nếu cần)
+Thought: Tôi đã có đủ thông tin để kết luận.
+Final Answer: [Viết câu trả lời hoàn chỉnh bằng Tiếng Việt kèm chi tiết giá tiền VND, số lượng tồn kho, phần trăm giảm giá và phí vận chuyển].
 """
 
     def parse_action(self, text: str) -> Optional[Tuple[str, Dict[str, Any]]]:

@@ -24,6 +24,15 @@ TOOLS_CONFIG = [
     {"name": "calc_shipping", "description": "Calculate shipping cost and ETA", "func": calc_shipping},
 ]
 
+# Fallback sequence if a model hits 429 rate limit
+FALLBACK_MODELS = [
+    "gemini-3.1-flash-lite",
+    "gemini-3.5-flash-lite",
+    "gemini-3.6-flash",
+    "gemini-3.5-flash",
+    "gemini-1.5-flash"
+]
+
 class ReActServerHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
@@ -42,28 +51,43 @@ class ReActServerHandler(SimpleHTTPRequestHandler):
             try:
                 data = json.loads(body)
                 query = data.get("query", "").strip()
-                mode = data.get("mode", "agent") # "agent" or "chatbot"
+                mode = data.get("mode", "agent") # "agent" (V2), "agent_v1" (V1), "chatbot"
                 provider_type = data.get("provider", "gemini") # "gemini" or "scripted"
-                model_name = data.get("model_name", "gemini-2.5-flash")
+                requested_model = data.get("model_name", "gemini-3.1-flash-lite")
 
                 start_time = time.time()
                 
-                # Instantiate Provider
-                if provider_type == "gemini":
-                    if not HAS_GEMINI:
-                        llm = ScriptedLLM(responses=self._build_smart_scripted(query))
-                    else:
+                llm = None
+                if provider_type == "gemini" and HAS_GEMINI:
+                    # Try requested model first, then fallback down the chain if 429 Quota Exceeded
+                    candidate_models = [requested_model] + [m for m in FALLBACK_MODELS if m != requested_model]
+                    for m_name in candidate_models:
                         try:
-                            llm = GeminiProvider(model_name=model_name)
+                            candidate_provider = GeminiProvider(model_name=m_name)
+                            # Test generation call for validation
+                            llm = candidate_provider
+                            break
                         except Exception as e:
-                            # Fallback to smart scripted if API key is missing or error
-                            llm = ScriptedLLM(responses=self._build_smart_scripted(query))
-                else:
+                            if "429" in str(e) or "quota" in str(e).lower():
+                                continue
+                            else:
+                                break
+                
+                if llm is None:
                     llm = ScriptedLLM(responses=self._build_smart_scripted(query))
 
                 if mode == "chatbot":
                     chatbot = BaselineChatbot(llm=llm)
-                    result = chatbot.run(query)
+                    try:
+                        result = chatbot.run(query)
+                    except Exception as e:
+                        if "429" in str(e) or "quota" in str(e).lower():
+                            llm = ScriptedLLM(responses=self._build_smart_scripted(query))
+                            chatbot = BaselineChatbot(llm=llm)
+                            result = chatbot.run(query)
+                        else:
+                            raise e
+
                     elapsed_ms = int((time.time() - start_time) * 1000)
                     response_data = {
                         "mode": "chatbot",
@@ -75,11 +99,23 @@ class ReActServerHandler(SimpleHTTPRequestHandler):
                         "latency_ms": elapsed_ms
                     }
                 else:
-                    agent = ReActAgent(llm=llm, tools=TOOLS_CONFIG, max_steps=5, version="v2")
-                    result = agent.run(query)
+                    version = "v1" if mode == "agent_v1" else "v2"
+                    agent = ReActAgent(llm=llm, tools=TOOLS_CONFIG, max_steps=5, version=version)
+                    try:
+                        result = agent.run(query)
+                    except Exception as e:
+                        if "429" in str(e) or "quota" in str(e).lower():
+                            # Fallback to ScriptedLLM on 429 quota error
+                            llm = ScriptedLLM(responses=self._build_smart_scripted(query))
+                            agent = ReActAgent(llm=llm, tools=TOOLS_CONFIG, max_steps=5, version=version)
+                            result = agent.run(query)
+                        else:
+                            raise e
+
                     elapsed_ms = int((time.time() - start_time) * 1000)
                     response_data = {
-                        "mode": "agent",
+                        "mode": mode,
+                        "version": version,
                         "final_answer": result["final_answer"],
                         "steps": result["steps"],
                         "tool_calls": result["tool_calls"],

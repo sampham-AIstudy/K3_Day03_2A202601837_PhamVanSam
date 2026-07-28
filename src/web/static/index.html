@@ -1,26 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReAct Agent - Kimi / Claude Edition</title>
+    <title>ReAct Agent Studio - Multi-Model & High Quota Edition</title>
     <!-- Google Fonts: Inter & Fira Code -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div class="app-wrapper">
         <!-- Top Minimal Header -->
         <header class="top-nav">
             <div class="brand">
                 <span class="brand-icon">⚡</span>
-                <span class="brand-title">ReAct Agent</span>
+                <span class="brand-title">ReAct Agent Studio</span>
             </div>
             <div class="header-status">
                 <span class="status-dot"></span>
-                <span id="header-status-text">Gemini 2.5 Flash</span>
+                <span id="header-status-text">Gemini 3.1 Lite (500 RPD)</span>
             </div>
         </header>
 
@@ -33,7 +37,7 @@
                     <div class="avatar-icon">⚡</div>
                     <div class="message-bubble">
                         <div class="message-text">
-                            Chào bạn, tôi là ReAct Agent. Tôi có thể giúp gì cho bạn hôm nay về kiểm tra tồn kho, mã giảm giá, hay tính phí giao hàng?
+                            Chào bạn! Tôi là ReAct Agent Studio.
                         </div>
                     </div>
                 </div>
@@ -43,51 +47,86 @@
             <div class="bottom-dock">
                 <!-- Preset Prompt Pills -->
                 <div class="preset-pills">
-                    <button class="pill-btn" onclick="usePreset('2 iPhone + WINNER + Hanoi (0.8kg)')">📱 2 iPhone + WINNER + Hanoi</button>
+                    <button class="pill-btn" onclick="usePreset('2 iPhone + WINNER + Hanoi (0.8kg)')">📱 2 iPhone +
+                        WINNER + Hanoi</button>
                     <button class="pill-btn" onclick="usePreset('MacBook → Saigon?')">💻 MacBook → Saigon</button>
-                    <button class="pill-btn" onclick="usePreset('iPad + LEGACY + Saigon (0.5kg)')">📱 iPad + LEGACY</button>
+                    <button class="pill-btn" onclick="usePreset('iPad + LEGACY + Saigon (0.5kg)')">📱 iPad +
+                        LEGACY</button>
                     <button class="pill-btn" onclick="usePreset('Return policy?')">📜 Return policy</button>
                 </div>
 
                 <!-- Input Bar with Claude-Style Popover Selector -->
                 <form id="chat-form" class="input-bar" onsubmit="sendMessage(event)">
-                    <input type="text" id="user-input" placeholder="Ask ReAct Agent a question..." autocomplete="off" required>
-                    
+                    <input type="text" id="user-input" placeholder="Ask ReAct Agent a question..." autocomplete="off"
+                        required>
+
                     <!-- Claude-style Popover Container -->
                     <div class="popover-wrapper">
-                        <button type="button" class="selector-pill" id="selector-pill-btn" onclick="togglePopover(event)">
-                            <span id="pill-label">ReAct Agent V2</span>
+                        <button type="button" class="selector-pill" id="selector-pill-btn"
+                            onclick="togglePopover(event)">
+                            <span id="pill-label">ReAct Agent V2 • Gemini 3.1 Lite</span>
                             <span class="pill-arrow">▾</span>
                         </button>
 
                         <!-- Popover Menu -->
                         <div class="popover-menu" id="popover-menu">
-                            <div class="popover-section-title">MODE</div>
+                            <div class="popover-section-title">MODE / ARCHITECTURE</div>
                             <div class="popover-item active" id="item-mode-agent" onclick="selectMode('agent')">
-                                <span>⚡ ReAct Agent V2</span>
+                                <span>⚡ ReAct Agent V2 (Có Guardrails)</span>
+                                <span class="check-mark">✓</span>
+                            </div>
+                            <div class="popover-item" id="item-mode-agent_v1" onclick="selectMode('agent_v1')">
+                                <span>⚙️ ReAct Agent V1 (Nguyên bản)</span>
                                 <span class="check-mark">✓</span>
                             </div>
                             <div class="popover-item" id="item-mode-chatbot" onclick="selectMode('chatbot')">
-                                <span>💬 Baseline Chatbot</span>
+                                <span>💬 Baseline Chatbot (1 Call, 0 Tool)</span>
                                 <span class="check-mark">✓</span>
                             </div>
 
                             <div class="popover-divider"></div>
 
-                            <div class="popover-section-title">PROVIDER</div>
-                            <div class="popover-item active" id="item-prov-gemini" onclick="selectProvider('gemini')">
-                                <span>✨ Gemini 2.5 Flash</span>
+                            <div class="popover-section-title">HIGH QUOTA GEMINI MODELS</div>
+                            <div class="popover-item active" id="item-model-g31fl"
+                                onclick="selectModel('g31fl', 'gemini-3.1-flash-lite', 'Gemini 3.1 Lite (500 RPD)', 'gemini')">
+                                <span>✨ gemini-3.1-flash-lite (500 RPD/ngày)</span>
                                 <span class="check-mark">✓</span>
                             </div>
-                            <div class="popover-item" id="item-prov-scripted" onclick="selectProvider('scripted')">
-                                <span>⚡ Scripted Simulator</span>
+                            <div class="popover-item" id="item-model-g35fl"
+                                onclick="selectModel('g35fl', 'gemini-3.5-flash-lite', 'Gemini 3.5 Lite (500 RPD)', 'gemini')">
+                                <span>⚡ gemini-3.5-flash-lite (500 RPD/ngày)</span>
+                                <span class="check-mark">✓</span>
+                            </div>
+                            <div class="popover-item" id="item-model-g36f"
+                                onclick="selectModel('g36f', 'gemini-3.6-flash', 'Gemini 3.6 Flash', 'gemini')">
+                                <span>🧠 gemini-3.6-flash (Mới nhất)</span>
+                                <span class="check-mark">✓</span>
+                            </div>
+                            <div class="popover-item" id="item-model-g35f"
+                                onclick="selectModel('g35f', 'gemini-3.5-flash', 'Gemini 3.5 Flash', 'gemini')">
+                                <span>🚀 gemini-3.5-flash</span>
+                                <span class="check-mark">✓</span>
+                            </div>
+                            <div class="popover-item" id="item-model-g25f"
+                                onclick="selectModel('g25f', 'gemini-2.5-flash', 'Gemini 2.5 Flash', 'gemini')">
+                                <span>🧪 gemini-2.5-flash</span>
+                                <span class="check-mark">✓</span>
+                            </div>
+
+                            <div class="popover-divider"></div>
+
+                            <div class="popover-section-title">OFFLINE SIMULATOR</div>
+                            <div class="popover-item" id="item-model-scripted"
+                                onclick="selectModel('scripted', 'scripted', 'Scripted Simulator', 'scripted')">
+                                <span>⚡ Scripted Simulator (Offline)</span>
                                 <span class="check-mark">✓</span>
                             </div>
                         </div>
                     </div>
 
                     <button type="submit" id="send-btn" class="send-action-btn">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
                             <path d="M22 2L11 13" />
                             <path d="M22 2L15 22L11 13L2 9L22 2" />
                         </svg>
@@ -101,4 +140,5 @@
 
     <script src="app.js"></script>
 </body>
+
 </html>

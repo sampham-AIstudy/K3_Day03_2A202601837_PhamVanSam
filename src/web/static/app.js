@@ -1,34 +1,68 @@
-let currentMode = 'agent';
+let currentMode = 'agent'; // 'agent' (V2), 'agent_v1' (V1), 'chatbot'
 let currentProvider = 'gemini';
+let currentModelName = 'gemini-3.1-flash-lite';
+let currentModelDisplayName = 'Gemini 3.1 Lite';
+let currentModelKey = 'g31fl';
 
 function togglePopover(event) {
-    event.stopPropagation();
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
     const menu = document.getElementById('popover-menu');
-    menu.classList.toggle('open');
+    if (menu) {
+        menu.classList.toggle('open');
+    }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('selector-pill-btn');
+    if (btn) {
+        btn.addEventListener('click', (e) => {
+            togglePopover(e);
+        });
+    }
+});
 
 function selectMode(mode) {
     currentMode = mode;
     
     document.getElementById('item-mode-agent').classList.toggle('active', mode === 'agent');
+    document.getElementById('item-mode-agent_v1').classList.toggle('active', mode === 'agent_v1');
     document.getElementById('item-mode-chatbot').classList.toggle('active', mode === 'chatbot');
     
-    const pillLabel = document.getElementById('pill-label');
-    pillLabel.innerText = mode === 'agent' ? 'ReAct Agent V2' : 'Baseline Chatbot';
-
+    updatePillLabel();
     closePopover();
 }
 
-function selectProvider(prov) {
-    currentProvider = prov;
+function selectModel(modelKey, modelName, displayName, providerType) {
+    currentModelKey = modelKey;
+    currentModelName = modelName;
+    currentModelDisplayName = displayName;
+    currentProvider = providerType;
 
-    document.getElementById('item-prov-gemini').classList.toggle('active', prov === 'gemini');
-    document.getElementById('item-prov-scripted').classList.toggle('active', prov === 'scripted');
+    ['g31fl', 'g35fl', 'g36f', 'g35f', 'g25f', 'scripted'].forEach(k => {
+        const item = document.getElementById(`item-model-${k}`);
+        if (item) item.classList.toggle('active', k === modelKey);
+    });
 
     const statusText = document.getElementById('header-status-text');
-    statusText.innerText = prov === 'gemini' ? 'Gemini 2.5 Flash' : 'Scripted Simulator';
+    if (statusText) statusText.innerText = displayName;
 
+    updatePillLabel();
     closePopover();
+}
+
+function updatePillLabel() {
+    const pillLabel = document.getElementById('pill-label');
+    if (!pillLabel) return;
+
+    let modeTitle = 'ReAct V2';
+    if (currentMode === 'agent_v1') modeTitle = 'ReAct V1';
+    if (currentMode === 'chatbot') modeTitle = 'Chatbot';
+
+    let modelShort = currentModelDisplayName.replace('Gemini ', '');
+    pillLabel.innerText = `${modeTitle} • ${modelShort}`;
 }
 
 function closePopover() {
@@ -67,9 +101,11 @@ async function sendMessage(event) {
     appendLiveThinkingMessage(pendingMsgId);
 
     const liveStatusText = document.getElementById(`thinking-text-${pendingMsgId}`);
-    if (liveStatusText && currentMode === 'agent') {
+    if (liveStatusText && currentMode !== 'chatbot') {
         setTimeout(() => { if (liveStatusText) liveStatusText.innerText = "Analyzing query & checking tools..."; }, 300);
         setTimeout(() => { if (liveStatusText) liveStatusText.innerText = "Executing e-commerce tools..."; }, 800);
+    } else if (liveStatusText) {
+        liveStatusText.innerText = "Generating answer...";
     }
 
     try {
@@ -80,7 +116,7 @@ async function sendMessage(event) {
                 query: query,
                 mode: currentMode,
                 provider: currentProvider,
-                model_name: 'gemini-2.5-flash'
+                model_name: currentModelName
             })
         });
 
@@ -141,7 +177,7 @@ function updateBotMessageWithTrace(msgId, data) {
     bubbleContainer.innerHTML = '';
 
     // If ReAct Agent mode & trace exists, build Collapsible Accordion (Collapsed by Default)
-    if (data.mode === 'agent' && data.trace && data.trace.length > 0) {
+    if (data.mode !== 'chatbot' && data.trace && data.trace.length > 0) {
         const accordion = document.createElement('div');
         accordion.className = 'thought-accordion';
 

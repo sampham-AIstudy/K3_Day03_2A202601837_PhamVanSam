@@ -16,7 +16,7 @@ except ImportError:
     HAS_GEMINI = False
 
 class GeminiProvider(LLMProvider):
-    def __init__(self, model_name: str = "gemini-2.5-flash", api_key: Optional[str] = None):
+    def __init__(self, model_name: str = "gemini-3.1-flash-lite", api_key: Optional[str] = None):
         if not HAS_GEMINI:
             raise RuntimeError(
                 "Package 'google-generativeai' is not installed in your Python environment.\n"
